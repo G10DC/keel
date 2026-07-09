@@ -66,3 +66,11 @@ export function fetchProvider({ endpoint, model, apiKey, fetchImpl } = {}) {
   };
 }
 
+/** Scripted provider: returns responses in sequence (the last one repeats on overflow). Tests/demos. */
+export function scriptProvider(steps) {
+  let i = 0;
+  return {
+    async complete() { const r = steps[i] ?? steps[steps.length - 1]; i += 1; return r; },
+  };
+}
+
