@@ -1,5 +1,7 @@
 /** Declarative step handlers. A step may declare { kind, config } instead of a `run` function; the
  *  dispatcher resolves kind → handler. Predictable, config-driven routing — not learned. */
+import { runShell } from './sandbox.mjs';
+
 const REGISTRY = new Map();
 
 /** Register a handler for a step kind. */
@@ -18,6 +20,7 @@ export const builtinHandlers = {
     return { ok: true, value: r.text, meta: r.meta };
   },
   transform: async (cfg, ctx, mailbox) => ({ ok: true, value: cfg.fn(ctx, mailbox) }),
+  shell: async (cfg) => runShell(cfg.cmd, { cwd: cfg.cwd, env: cfg.env, timeoutMs: cfg.timeoutMs }),
 };
 
 /** (Re)register all built-ins. Idempotent. */
