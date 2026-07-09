@@ -27,3 +27,15 @@ test('dispatcher: declarative shell step', async () => {
   assert.equal(res.ok, true);
   assert.match(res.results.get('a').value, /shellstep/);
 });
+
+test('runShell: allowlist permits an allowed command', async () => {
+  const r = await runShell('echo ok', { allow: ['echo'] });
+  assert.equal(r.ok, true);
+  assert.match(r.value, /ok/);
+});
+
+test('runShell: allowlist denies a non-allowed command', async () => {
+  const r = await runShell('rm -rf /', { allow: ['echo', 'ls'] });
+  assert.equal(r.ok, false);
+  assert.match(r.error, /allowlist/);
+});
