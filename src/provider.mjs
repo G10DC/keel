@@ -45,3 +45,24 @@ export function withCircuitBreaker(provider, { threshold = 3, resetMs = 1000, re
 
   return { state: () => state, complete: (args) => call(args) };
 }
+
+/** HTTP provider for an OpenAI-compatible /chat/completions endpoint. Uses global fetch (Node ≥ 18);
+ *  inject `fetchImpl` for deterministic tests. Authorization header is sent only when apiKey is set. */
+export function fetchProvider({ endpoint, model, apiKey, fetchImpl } = {}) {
+  const doFetch = fetchImpl ?? globalThis.fetch;
+  return {
+    async complete({ messages }) {
+      if (typeof doFetch !== 'function') throw new Error('no fetch implementation available');
+      const res = await doFetch(endpoint, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...(apiKey ? { authorization: `Bearer ${apiKey}` } : {}) },
+        body: JSON.stringify({ model, messages }),
+      });
+      if (!res.ok) throw new Error(`provider http ${res.status}`);
+      const json = await res.json();
+      const text = json?.choices?.[0]?.message?.content ?? '';
+      return { text, meta: { model, usage: json?.usage ?? null } };
+    },
+  };
+}
+
