@@ -1,14 +1,22 @@
-// keel CLI — run a plan module through the dispatcher with a provider and a trust/audit context.
-// usage: keel run --plan plan.mjs   (plan module exports { instructions?, steps })
+// keel CLI — `keel run --plan <plan.mjs>` runs a plan; `keel mcp` serves the MCP stdio surface.
 import { pathToFileURL } from 'node:url';
+import * as readline from 'node:readline';
 import { run } from './dispatcher.mjs';
 import { mockProvider } from './provider.mjs';
 import { createPolicy, AuditLog } from './trust.mjs';
+import { serve, mcpMethods } from './mcp.mjs';
 
 export async function main(argv = process.argv.slice(2)) {
+  if (argv[0] === 'mcp') {
+    const rl = readline.createInterface({ input: process.stdin });
+    await serve({ input: rl, output: process.stdout, methods: mcpMethods() });
+    rl.close();
+    return 0;
+  }
+
   const i = argv.indexOf('--plan');
   const file = i >= 0 ? argv[i + 1] : null;
-  if (!file) { console.error('usage: keel run --plan <plan.mjs>'); return 2; }
+  if (!file) { console.error('usage: keel run --plan <plan.mjs> | keel mcp'); return 2; }
 
   const imported = await import(pathToFileURL(file).href);
   const plan = imported.default ?? imported;
