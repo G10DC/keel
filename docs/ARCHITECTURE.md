@@ -15,9 +15,11 @@ flowchart TD
 ```
 
 ## Modules
-- `src/dispatcher.mjs` — `run(steps, ctx)`: topological schedule, parallel ready set, failure-as-value, failed-dependency skip.
-- `src/provider.mjs` — `mockProvider`, `withCircuitBreaker` (CLOSED → OPEN → HALF_OPEN → CLOSED, exponential backoff).
-- `src/trust.mjs` — `createPolicy` (frozen), `separateInstructionData`, `provenance`, `AuditLog` (SHA-256 hash-chain).
+- `src/dispatcher.mjs` — `run(steps, ctx)`: topological schedule, parallel ready set, failure-as-value, failed-dependency skip, mailbox auto-populate, per-step audit, scoped credentials.
+- `src/handlers.mjs` — declarative step kinds (`literal`, `llm`, `transform`, `shell`) + handler registry.
+- `src/provider.mjs` — `mockProvider`, `fetchProvider` (real, OpenAI-compatible), `withCircuitBreaker` (CLOSED → OPEN → HALF_OPEN → CLOSED, exponential backoff).
+- `src/sandbox.mjs` — `runShell` (subprocess isolation, timeout, scoped env, failure-as-value).
+- `src/trust.mjs` — `createPolicy` (frozen), `separateInstructionData`, `provenance`, `AuditLog` (SHA-256 hash-chain, integrity-protected provenance).
 - `src/cli.mjs` — `keel run --plan`.
 
 ## Layering (dependencies point down)

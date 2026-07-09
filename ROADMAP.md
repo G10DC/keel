@@ -8,10 +8,12 @@
 - [ ] **MCP surface** — young platform; keep CLI primary, add MCP as a secondary transport with its own cancellation/streaming semantics (not a duplicated skin).
 - [ ] **Real provider adapters** (OpenAI / Anthropic / local) behind the boundary — currently a mock.
 
-## Core hardening
-- [ ] Declarative hook routing (config-driven task dispatch).
-- [ ] Execution-layer sandboxing guidance/integration (the honest place for code-exec isolation).
-- [ ] Provenance propagation end-to-end through the dispatcher.
+## Core hardening (v0.2)
+- [x] Declarative routing (`literal`/`llm`/`transform`/`shell` handlers).
+- [x] Execution-layer runner (`runShell` — subprocess isolation; honest: not a security sandbox).
+- [x] Provenance propagation end-to-end (per-step, source-tagged, integrity-protected audit).
+- [x] Real HTTP provider adapter (`fetchProvider`) behind the boundary.
+- [x] Scoped credentials (only authorized steps see creds).
 
 ## Validation (the gating milestone)
 - [ ] Real users getting measurable value from the minimal core before any maximal build-out.

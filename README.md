@@ -8,9 +8,11 @@
 Maximalist harnesses ship a catalog of capabilities in the rhetoric of a trade-off. `keel` takes the opposite bet: a trustworthy minimal core, where the defensible position is **trustworthiness and replay-grade auditability**, not feature breadth. The capabilities most likely to poison a harness — trajectory-based self-learning (no proven precedent; feedback-loop poisoning), swarm coordination (regresses to sequential for interdependent coding), and learned "intelligent routing" — are **not in the core**; they stay behind flags until they earn their complexity.
 
 ## The core
-- **Dispatcher** (`run(steps)`) — structured concurrency over steps that declare dependencies; a shared mailbox; **failure-as-value** (steps return `{ ok, value? }` / `{ ok:false, error? }`, never throw).
-- **Provider boundary** — a swappable `complete({ messages, policy })` interface; `withCircuitBreaker` adds retry/backoff + open/half-open/close. Provider routing is plumbing, not "intelligence".
-- **Trust** — `createPolicy` (frozen per task), `separateInstructionData` (the instruction/data trust boundary), `provenance`, and a hash-chained, tamper-evident `AuditLog`.
+- **Dispatcher** (`run(steps)`) — structured concurrency over steps that declare dependencies; a shared mailbox auto-populated with each step result; **failure-as-value** (steps return `{ ok, value? }` / `{ ok:false, error? }`, never throw).
+- **Provider boundary** — a swappable `complete({ messages, policy })` interface: `mockProvider`, a real **`fetchProvider`** (OpenAI-compatible, injectable fetch), and `withCircuitBreaker` (retry/backoff + open/half-open/close). Provider routing is plumbing, not "intelligence".
+- **Declarative handlers** — steps can be `{ kind, config }` instead of functions; built-ins `literal`, `llm`, `transform`, `shell`. Routing is config-driven and predictable.
+- **Trust** — `createPolicy` (frozen per task), `separateInstructionData` (the instruction/data trust boundary), `provenance`, a hash-chained tamper-evident `AuditLog` (per-step, source-tagged), and **scoped credentials** (only authorized steps see creds).
+- **Execution-layer runner** — `runShell` (subprocess isolation, timeout, scoped env, failure-as-value). Honestly scoped: isolation, not a security sandbox.
 - **CLI** — `keel run --plan plan.mjs`.
 
 ## keel vs a maximalist harness
@@ -33,7 +35,7 @@ import { run, mockProvider, withCircuitBreaker, createPolicy, AuditLog } from '.
 ```
 
 ## Status — minimal core, validated
-The minimal core is built and tested (unit + end-to-end probe; 100% line coverage on `src/`). The maximal capabilities are intentionally absent — see `ROADMAP.md`. This is the "validate the category before maximizing" milestone.
+The minimal core is built and tested — 30 tests, 100% line coverage on `src/`, plus a real HTTP provider adapter, declarative handlers, an execution-layer shell runner, and trust wired end-to-end (provenance + scoped credentials + tamper-evident audit). The maximal capabilities (self-learning, swarm, MCP) are intentionally absent — see `ROADMAP.md`.
 
 ## License
 MIT — see `LICENSE`.
