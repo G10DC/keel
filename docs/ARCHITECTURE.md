@@ -15,12 +15,15 @@ flowchart TD
 ```
 
 ## Modules
-- `src/dispatcher.mjs` — `run(steps, ctx)`: topological schedule, parallel ready set, failure-as-value, failed-dependency skip, mailbox auto-populate, per-step audit, scoped credentials.
+- `src/dispatcher.mjs` — `run(steps, ctx)`: topological schedule, parallel ready set, failure-as-value, failed-dependency skip, mailbox auto-populate, per-step audit, scoped credentials, `maxParallel`/`timeoutMs`/`retry`.
+- `src/agent.mjs` — `loop()`: model-driven ReAct agent loop (tool-use through the trust boundary).
 - `src/handlers.mjs` — declarative step kinds (`literal`, `llm`, `transform`, `shell`) + handler registry.
-- `src/provider.mjs` — `mockProvider`, `fetchProvider` (real, OpenAI-compatible), `withCircuitBreaker` (CLOSED → OPEN → HALF_OPEN → CLOSED, exponential backoff).
-- `src/sandbox.mjs` — `runShell` (subprocess isolation, timeout, scoped env, failure-as-value).
+- `src/provider.mjs` — `mockProvider`, `fetchProvider` (real, OpenAI-compatible), `withCircuitBreaker`, `scriptProvider`, `streamProvider`/`stream`.
+- `src/sandbox.mjs` — `runShell` (subprocess isolation, timeout, scoped env, allowlist, failure-as-value).
+- `src/store.mjs` — `Store` (in-memory + JSON file persistence; not a learning layer).
 - `src/trust.mjs` — `createPolicy` (frozen), `separateInstructionData`, `provenance`, `AuditLog` (SHA-256 hash-chain, integrity-protected provenance).
-- `src/cli.mjs` — `keel run --plan`.
+- `src/mcp.mjs` — `mcpMethods` / `serve`: thin JSON-RPC stdio surface reusing the core.
+- `src/cli.mjs` — `keel run --plan` | `keel mcp`.
 
 ## Layering (dependencies point down)
 - **Trust** (`trust.mjs`): pure + `node:crypto` only — fully unit-tested.

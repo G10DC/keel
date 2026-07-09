@@ -8,12 +8,15 @@
 Maximalist harnesses ship a catalog of capabilities in the rhetoric of a trade-off. `keel` takes the opposite bet: a trustworthy minimal core, where the defensible position is **trustworthiness and replay-grade auditability**, not feature breadth. The capabilities most likely to poison a harness — trajectory-based self-learning (no proven precedent; feedback-loop poisoning), swarm coordination (regresses to sequential for interdependent coding), and learned "intelligent routing" — are **not in the core**; they stay behind flags until they earn their complexity.
 
 ## The core
-- **Dispatcher** (`run(steps)`) — structured concurrency over steps that declare dependencies; a shared mailbox auto-populated with each step result; **failure-as-value** (steps return `{ ok, value? }` / `{ ok:false, error? }`, never throw).
-- **Provider boundary** — a swappable `complete({ messages, policy })` interface: `mockProvider`, a real **`fetchProvider`** (OpenAI-compatible, injectable fetch), and `withCircuitBreaker` (retry/backoff + open/half-open/close). Provider routing is plumbing, not "intelligence".
-- **Declarative handlers** — steps can be `{ kind, config }` instead of functions; built-ins `literal`, `llm`, `transform`, `shell`. Routing is config-driven and predictable.
-- **Trust** — `createPolicy` (frozen per task), `separateInstructionData` (the instruction/data trust boundary), `provenance`, a hash-chained tamper-evident `AuditLog` (per-step, source-tagged), and **scoped credentials** (only authorized steps see creds).
-- **Execution-layer runner** — `runShell` (subprocess isolation, timeout, scoped env, failure-as-value). Honestly scoped: isolation, not a security sandbox.
-- **CLI** — `keel run --plan plan.mjs`.
+- **Dispatcher** (`run(steps)`) — structured concurrency over steps that declare dependencies; a shared mailbox auto-populated with each step result; **failure-as-value**; optional `maxParallel`, per-step `timeoutMs`, per-step `retry`.
+- **Agent loop** (`loop`) — model-driven ReAct: the model may call tools (executed through the trust boundary), `maxIter`, failure-as-value. This is what makes keel an agent harness, not just a workflow runner.
+- **Provider boundary** — a swappable `complete({ messages, policy, onToken })` interface: `mockProvider`, a real **`fetchProvider`** (OpenAI-compatible), `withCircuitBreaker`, plus `stream()` (token streaming with graceful fallback).
+- **Declarative handlers** — steps can be `{ kind, config }` instead of functions; built-ins `literal`, `llm`, `transform`, `shell`.
+- **Trust** — `createPolicy` (frozen per task), `separateInstructionData` (the instruction/data trust boundary), `provenance`, a hash-chained tamper-evident `AuditLog` (per-step, source-tagged), and **scoped credentials**.
+- **Execution-layer runner** — `runShell` (subprocess isolation, timeout, scoped env, allowlist, failure-as-value). Honestly scoped: isolation, not a security sandbox.
+- **Persistence** — `Store` (in-memory + JSON file) for state that crosses runs (not a learning layer).
+- **MCP** — `keel mcp`: a thin stdio server exposing `keel_run` + `keel_separate`, **reusing the core** (no duplicated logic).
+- **CLI** — `keel run --plan plan.mjs` | `keel mcp`.
 
 ## keel vs a maximalist harness
 | Dimension | maximalist (e.g. ruflo) | keel |
@@ -23,7 +26,7 @@ Maximalist harnesses ship a catalog of capabilities in the rhetoric of a trade-o
 | Swarm | core | **deferred** (regresses to sequential for coding) |
 | Routing | "intelligent" | declarative hooks + circuit-breaker plumbing |
 | Security | orchestration-layer guardrails | trust partition (instruction/data + audit); sandboxing honestly at the execution layer |
-| Surface | CLI + MCP + web (duplicated) | CLI first; MCP deferred (young platform) |
+| Surface | CLI + MCP + web (duplicated) | CLI + thin MCP-stdio (**shared core**, no duplicated logic) |
 | Dependencies | large | **zero runtime** (Node built-ins) |
 
 ## Use
@@ -35,7 +38,7 @@ import { run, mockProvider, withCircuitBreaker, createPolicy, AuditLog } from '.
 ```
 
 ## Status — minimal core, validated
-The minimal core is built and tested — 30 tests, 100% line coverage on `src/`, plus a real HTTP provider adapter, declarative handlers, an execution-layer shell runner, and trust wired end-to-end (provenance + scoped credentials + tamper-evident audit). The maximal capabilities (self-learning, swarm, MCP) are intentionally absent — see `ROADMAP.md`.
+The core is built and tested — 54 tests, 100% line coverage on `src/`, an autonomous agent loop, a real HTTP provider adapter (with a local-server e2e test), token streaming, declarative handlers, an execution-layer shell runner with allowlist, persistence, a thin MCP-stdio surface, and trust wired end-to-end. What stays **deferred** (by design, behind flags until earned): self-learning, swarm, federation, web UI — see `ROADMAP.md`.
 
 ## License
 MIT — see `LICENSE`.
