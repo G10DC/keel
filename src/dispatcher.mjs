@@ -1,3 +1,5 @@
+import { getHandler } from './handlers.mjs';
+
 /** Run a plan with structured concurrency over steps that declare dependencies.
  *  Failure-as-value: a step's `run` returns { ok, value? } or { ok:false, error? }; throwing is caught.
  *  Mailbox: a shared Map steps read/write (message passing). ctx = { policy, audit, provider, mailbox }. */
@@ -23,8 +25,15 @@ export async function run(steps, { policy, audit, provider } = {}) {
     }
     await Promise.all(ready.map(async (id) => {
       const s = byId.get(id);
+      const exec = typeof s.run === 'function'
+        ? s.run
+        : (c, mb) => {
+            const h = getHandler(s.kind);
+            if (!h) throw new Error(`unknown step kind: ${s.kind}`);
+            return h(s.config ?? {}, c, mb);
+          };
       try {
-        const r = await s.run(ctx, mailbox);
+        const r = await exec(ctx, mailbox);
         results.set(id, r && typeof r === 'object' && 'ok' in r ? r : { ok: true, value: r });
       } catch (e) {
         results.set(id, { ok: false, error: e?.message ?? String(e) });
