@@ -3,7 +3,7 @@ import { getHandler } from './handlers.mjs';
 /** Run a plan with structured concurrency over steps that declare dependencies.
  *  Failure-as-value: a step's `run` returns { ok, value? } or { ok:false, error? }; throwing is caught.
  *  Mailbox: a shared Map steps read/write (message passing). ctx = { policy, audit, provider, mailbox }. */
-export async function run(steps, { policy, audit, provider } = {}) {
+export async function run(steps, { policy, audit, provider, credSteps } = {}) {
   const byId = new Map(steps.map((s) => [s.id, s]));
   const results = new Map();
   const mailbox = new Map();
@@ -32,12 +32,17 @@ export async function run(steps, { policy, audit, provider } = {}) {
             if (!h) throw new Error(`unknown step kind: ${s.kind}`);
             return h(s.config ?? {}, c, mb);
           };
+      const stepCtx = credSteps ? { ...ctx, creds: credSteps.includes(id) ? policy?.creds : undefined } : ctx;
+      let result;
       try {
-        const r = await exec(ctx, mailbox);
-        results.set(id, r && typeof r === 'object' && 'ok' in r ? r : { ok: true, value: r });
+        const r = await exec(stepCtx, mailbox);
+        result = r && typeof r === 'object' && 'ok' in r ? r : { ok: true, value: r };
       } catch (e) {
-        results.set(id, { ok: false, error: e?.message ?? String(e) });
+        result = { ok: false, error: e?.message ?? String(e) };
       }
+      results.set(id, result);
+      mailbox.set(id, result);
+      if (audit) audit.append({ type: 'step', payload: { id, ok: result.ok }, provenance: { source: `step:${id}` } });
       pending.delete(id);
     }));
   }

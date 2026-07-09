@@ -39,8 +39,8 @@ const GENESIS = sha('keel-genesis');
 export class AuditLog {
   constructor() { this._entries = []; this._prev = GENESIS; }
   get entries() { return this._entries.map((e) => ({ ...e })); }
-  append({ type, payload }) {
-    const body = { type, payload, ts: Date.now() };
+  append({ type, payload, provenance }) {
+    const body = { type, payload, ts: Date.now(), ...(provenance ? { provenance } : {}) };
     const entry = { ...body, prev: this._prev, hash: sha(this._prev + canonical(body)) };
     this._entries.push(entry);
     this._prev = entry.hash;
@@ -51,7 +51,7 @@ export class AuditLog {
     let prev = GENESIS;
     for (const e of this._entries) {
       if (e.prev !== prev) return false;
-      const body = { type: e.type, payload: e.payload, ts: e.ts };
+      const body = { type: e.type, payload: e.payload, ts: e.ts, ...(e.provenance ? { provenance: e.provenance } : {}) };
       if (e.hash !== sha(prev + canonical(body))) return false;
       prev = e.hash;
     }
