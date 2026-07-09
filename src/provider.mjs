@@ -74,3 +74,32 @@ export function scriptProvider(steps) {
   };
 }
 
+/** Streaming scripted provider: emits `chunks` via an `onToken` callback, then returns the joined text.
+ *  Streaming contract: `provider.complete({ onToken })` — a provider that supports streaming calls
+ *  `onToken(text)` per chunk; one that doesn't simply ignores it. */
+export function streamProvider(chunks) {
+  return {
+    async complete({ onToken } = {}) {
+      let text = '';
+      for (const c of chunks) {
+        text += c;
+        if (typeof onToken === 'function') { onToken(c); await Promise.resolve(); }
+      }
+      return { text, meta: { model: 'stream', chunks: chunks.length } };
+    },
+  };
+}
+
+/** Drive a provider with token streaming. Collects tokens and returns { text, meta, tokens }.
+ *  Graceful fallback: if the provider ignores `onToken`, `tokens` is empty and the final text is returned. */
+export async function stream(provider, { messages, policy, onToken } = {}) {
+  const tokens = [];
+  const r = await provider.complete({
+    messages,
+    policy,
+    onToken: (t) => { tokens.push(t); if (typeof onToken === 'function') onToken(t); },
+  });
+  return { ...r, tokens };
+}
+
+
