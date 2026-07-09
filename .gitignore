@@ -1,0 +1,43 @@
+# Operating system
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# Editors / IDEs
+.vscode/
+.idea/
+.vs/
+*.swp
+*.swo
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+out/
+coverage/
+*.tsbuildinfo
+
+# Python (tooling)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+credentials.json
+
+# Logs & temporary files
+*.log
+tmp/
+*.tmp
+.cache/
