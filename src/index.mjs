@@ -3,3 +3,4 @@ export { mockProvider, withCircuitBreaker, fetchProvider, scriptProvider, stream
 export { loop } from './agent.mjs';
 export { createPolicy, separateInstructionData, AuditLog, provenance } from './trust.mjs';
 export { registerHandler, getHandler, clearHandlers, registerBuiltins, builtinHandlers } from './handlers.mjs';
+export { Store } from './store.mjs';
