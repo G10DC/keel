@@ -1,8 +1,9 @@
+#!/usr/bin/env node
 // keel CLI — `keel run --plan <plan.mjs>` runs a plan; `keel mcp` serves the MCP stdio surface.
 import { pathToFileURL } from 'node:url';
 import * as readline from 'node:readline';
 import { run } from './dispatcher.mjs';
-import { mockProvider } from './provider.mjs';
+import { chooseProvider } from './provider.mjs';
 import { createPolicy, AuditLog } from './trust.mjs';
 import { serve, mcpMethods } from './mcp.mjs';
 
@@ -22,7 +23,7 @@ export async function main(argv = process.argv.slice(2)) {
   const plan = imported.default ?? imported;
   const audit = new AuditLog();
   const policy = createPolicy({ instructions: plan.instructions ?? [] });
-  const provider = mockProvider();
+  const provider = chooseProvider(); // default: Claude Code itself (KEEL_PROVIDER=mock per offline)
 
   audit.append({ type: 'plan.start', payload: { steps: plan.steps.map((s) => s.id) } });
   const res = await run(plan.steps, { policy, audit, provider });

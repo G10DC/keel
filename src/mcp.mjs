@@ -1,12 +1,12 @@
 import { run } from './dispatcher.mjs';
-import { mockProvider } from './provider.mjs';
+import { chooseProvider } from './provider.mjs';
 import { createPolicy, AuditLog, separateInstructionData } from './trust.mjs';
 
 const VERSION = '0.3.0';
 
 /** JSON-RPC method handlers. All reuse the core — no duplicated logic. `runImpl`/`providerFactory`
  *  injectable for tests. The MCP surface exposes the declarative subset (functions cannot cross JSON). */
-export function mcpMethods({ runImpl = run, providerFactory = mockProvider, version = VERSION } = {}) {
+export function mcpMethods({ runImpl = run, providerFactory = () => chooseProvider(), version = VERSION } = {}) {
   return {
     initialize: async () => ({
       protocolVersion: '2024-11-05',
