@@ -15,10 +15,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '${{ matrix.node }}' }
+        with:
+          node-version: '${{ matrix.node }}'
+          cache: 'npm'
+      - run: npm ci || npm install
       - run: node --test test/*.test.mjs
       - run: node --test --experimental-test-coverage test/*.test.mjs
-      - run: node src/cli.mjs run --plan examples/plan.mjs >/dev/null   # CLI smoke
+      - run: node src/cli.mjs run --plan examples/plan.mjs >/dev/null
 
   lint:
     name: lint
@@ -26,6 +29,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '22' }
-      - run: npm install -g eslint@9
-      - run: eslint src test
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci || npm install
+      - run: npx eslint .
