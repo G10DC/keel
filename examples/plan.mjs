@@ -3,7 +3,7 @@ export default {
   instructions: ['be concise and safe'],
   steps: [
     { id: 'seed', kind: 'literal', config: { value: 'keel' } },
-    { id: 'ask', deps: ['seed'], kind: 'llm', config: { messages: [{ role: 'user', content: 'ping' }] } },
+    { id: 'ask', deps: ['seed'], kind: 'model', config: { messages: [{ role: 'user', content: 'ping' }] } },
     { id: 'probe', kind: 'shell', config: { cmd: 'echo running-keel', timeoutMs: 2000 } },
   ],
 };

@@ -103,17 +103,17 @@ export async function stream(provider, { messages, policy, onToken } = {}) {
   return { ...r, tokens };
 }
 
-/** Drives Claude Code itself via the `claude` CLI in print mode. Reuses the user's existing auth,
- *  model, gateway and settings — so keel's LLM steps use the SAME backend as the interactive shell.
+/** Drives Agent environment itself via the `agent` CLI in print mode. Reuses the user's existing auth,
+ *  model, gateway and settings — so keel's processing engine steps use the SAME backend as the interactive shell.
  *  The prompt is piped via stdin (never enters the command line); stdout text is the completion.
  *  Set KEEL_PROVIDER=mock to switch the whole app to the offline mock instead. */
-export function claudeCliProvider({ cmd = 'claude', model, timeoutMs = 120000, extraArgs = [] } = {}) {
+export function claudeCliProvider({ cmd = 'agent', model, timeoutMs = 120000, extraArgs = [] } = {}) {
   return {
     async complete({ messages } = {}) {
       const prompt = messagesToPrompt(messages ?? []);
       const args = ['-p', '--output-format', 'text', ...(model ? ['--model', model] : []), ...extraArgs];
       const text = await runCmd(cmd, args, prompt, timeoutMs);
-      return { text, meta: { model: model ?? 'claude-code', via: 'claude-cli' } };
+      return { text, meta: { model: model ?? 'agent-code', via: 'agent-cli' } };
     },
   };
 }
@@ -137,21 +137,21 @@ function runCmd(cmd, args, stdinText, timeoutMs) {
     const child = spawn(isWin ? 'cmd' : cmd, isWin ? ['/c', cmd, ...args] : args, { windowsHide: true, shell: false });
     let out = '';
     let err = '';
-    const timer = setTimeout(() => { try { child.kill('SIGKILL'); } catch { /* noop */ } reject(new Error('claude cli timeout')); }, timeoutMs);
+    const timer = setTimeout(() => { try { child.kill('SIGKILL'); } catch { /* noop */ } reject(new Error('agent cli timeout')); }, timeoutMs);
     child.stdout.on('data', (d) => { out += d.toString(); });
     child.stderr.on('data', (d) => { err += d.toString(); });
     child.on('error', (e) => { clearTimeout(timer); reject(e); });
     child.on('close', (code) => {
       clearTimeout(timer);
       if (code === 0) resolve(out.trim());
-      else reject(new Error(`claude cli exit ${code}: ${err.trim().slice(0, 400)}`));
+      else reject(new Error(`agent cli exit ${code}: ${err.trim().slice(0, 400)}`));
     });
     child.stdin.on('error', () => { /* stdin may close early; ignore */ });
     child.stdin.end(stdinText);
   });
 }
 
-/** Choose the LLM provider from env. Default: claudeCliProvider (Claude Code itself).
+/** Choose the processing engine provider from env. Default: claudeCliProvider (Agent environment itself).
  *  KEEL_PROVIDER=mock → offline mock (tests / no-network demos). */
 export function chooseProvider() {
   if ((process.env.KEEL_PROVIDER ?? '').toLowerCase() === 'mock') return mockProvider();

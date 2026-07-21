@@ -17,7 +17,7 @@ flowchart TD
 ## Modules
 - `src/dispatcher.mjs` — `run(steps, ctx)`: topological schedule, parallel ready set, failure-as-value, failed-dependency skip, mailbox auto-populate, per-step audit, scoped credentials, `maxParallel`/`timeoutMs`/`retry`.
 - `src/agent.mjs` — `loop()`: model-driven ReAct agent loop (tool-use through the trust boundary).
-- `src/handlers.mjs` — declarative step kinds (`literal`, `llm`, `transform`, `shell`) + handler registry.
+- `src/handlers.mjs` — declarative step kinds (`literal`, `model`, `transform`, `shell`) + handler registry.
 - `src/provider.mjs` — `mockProvider`, `fetchProvider` (real, OpenAI-compatible), `withCircuitBreaker`, `scriptProvider`, `streamProvider`/`stream`.
 - `src/sandbox.mjs` — `runShell` (subprocess isolation, timeout, scoped env, allowlist, failure-as-value).
 - `src/store.mjs` — `Store` (in-memory + JSON file persistence; not a learning layer).

@@ -14,8 +14,8 @@ export function clearHandlers() { REGISTRY.clear(); }
 /** Built-in handlers: `fn(config, ctx, mailbox) → { ok, value?, error?, meta? }`. */
 export const builtinHandlers = {
   literal: async (cfg) => ({ ok: true, value: cfg.value }),
-  llm: async (cfg, ctx) => {
-    if (!ctx.provider) throw new Error('llm step requires a provider in context');
+  model: async (cfg, ctx) => {
+    if (!ctx.provider) throw new Error('model step requires a provider in context');
     const r = await ctx.provider.complete({ messages: cfg.messages ?? [], policy: ctx.policy });
     return { ok: true, value: r.text, meta: r.meta };
   },

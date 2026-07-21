@@ -23,7 +23,7 @@ export async function main(argv = process.argv.slice(2)) {
   const plan = imported.default ?? imported;
   const audit = new AuditLog();
   const policy = createPolicy({ instructions: plan.instructions ?? [] });
-  const provider = chooseProvider(); // default: Claude Code itself (KEEL_PROVIDER=mock per offline)
+  const provider = chooseProvider(); // default: Agent environment itself (KEEL_PROVIDER=mock per offline)
 
   audit.append({ type: 'plan.start', payload: { steps: plan.steps.map((s) => s.id) } });
   const res = await run(plan.steps, { policy, audit, provider });

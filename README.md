@@ -11,7 +11,7 @@ Maximalist harnesses ship a catalog of capabilities in the rhetoric of a trade-o
 - **Dispatcher** (`run(steps)`) — structured concurrency over steps that declare dependencies; a shared mailbox auto-populated with each step result; **failure-as-value**; optional `maxParallel`, per-step `timeoutMs`, per-step `retry`.
 - **Agent loop** (`loop`) — model-driven ReAct: the model may call tools (executed through the trust boundary), `maxIter`, failure-as-value. This is what makes keel an agent harness, not just a workflow runner.
 - **Provider boundary** — a swappable `complete({ messages, policy, onToken })` interface: `mockProvider`, a real **`fetchProvider`** (OpenAI-compatible), `withCircuitBreaker`, plus `stream()` (token streaming with graceful fallback).
-- **Declarative handlers** — steps can be `{ kind, config }` instead of functions; built-ins `literal`, `llm`, `transform`, `shell`.
+- **Declarative handlers** — steps can be `{ kind, config }` instead of functions; built-ins `literal`, `model`, `transform`, `shell`.
 - **Trust** — `createPolicy` (frozen per task), `separateInstructionData` (the instruction/data trust boundary), `provenance`, a hash-chained tamper-evident `AuditLog` (per-step, source-tagged), and **scoped credentials**.
 - **Execution-layer runner** — `runShell` (subprocess isolation, timeout, scoped env, allowlist, failure-as-value). Honestly scoped: isolation, not a security sandbox.
 - **Persistence** — `Store` (in-memory + JSON file) for state that crosses runs (not a learning layer).

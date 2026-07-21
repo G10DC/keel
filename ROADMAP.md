@@ -6,7 +6,7 @@
 - [x] Dispatcher (structured concurrency, failure-as-value, mailbox, deps).
 - [x] Provider boundary: mock + real `fetchProvider` (with local-server e2e test) + circuit-breaker + streaming.
 - [x] Trust: frozen policy, instruction/data separation, provenance, tamper-evident audit, scoped credentials.
-- [x] Declarative handlers (`literal`/`llm`/`transform`/`shell`).
+- [x] Declarative handlers (`literal`/`model`/`transform`/`shell`).
 - [x] Execution-layer `runShell` (isolation, timeout, allowlist).
 - [x] Agent loop (ReAct, tool-use through trust boundary).
 - [x] Dispatcher hardening (maxParallel, per-step timeout, per-step retry).
@@ -17,13 +17,13 @@
 ## Deferred (opt-in, behind flags) — each must prove value before entering the core
 - [ ] **Self-learning from trajectories** — zero precedent in reference harnesses + feedback-loop poisoning risk. Build last, with quarantined labels and clean ground truth.
 - [ ] **Swarm coordination** — real coding tasks are interdependent; ship simple parallel (already available via deps) first; add swarm only if genuine parallelism beats merge-conflict cost.
-- [ ] **Real provider adapters beyond OpenAI-compatible** (Anthropic-native, local) behind the boundary.
+- [ ] **Real provider adapters beyond OpenAI-compatible** (Engine Provider-native, local) behind the boundary.
 
 ## Validation (the gating milestone)
 - [ ] Real users getting measurable value from the core before any maximal build-out. (This remains a human step — the minimal core is now demonstrably complete enough to try.)
 
 ## Core hardening (v0.2)
-- [x] Declarative routing (`literal`/`llm`/`transform`/`shell` handlers).
+- [x] Declarative routing (`literal`/`model`/`transform`/`shell` handlers).
 - [x] Execution-layer runner (`runShell` — subprocess isolation; honest: not a security sandbox).
 - [x] Provenance propagation end-to-end (per-step, source-tagged, integrity-protected audit).
 - [x] Real HTTP provider adapter (`fetchProvider`) behind the boundary.

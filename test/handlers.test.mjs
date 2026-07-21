@@ -6,7 +6,7 @@ import { mockProvider } from '../src/provider.mjs';
 
 test('handlers: builtins registered on load', () => {
   assert.equal(typeof getHandler('literal'), 'function');
-  assert.equal(typeof getHandler('llm'), 'function');
+  assert.equal(typeof getHandler('model'), 'function');
 });
 
 test('handlers: register / get / clear', async () => {
@@ -23,9 +23,9 @@ test('dispatcher: declarative literal step', async () => {
   assert.equal(res.results.get('a').value, 42);
 });
 
-test('dispatcher: declarative llm step uses provider', async () => {
+test('dispatcher: declarative model step uses provider', async () => {
   const provider = mockProvider({ q: 'A' });
-  const res = await run([{ id: 'a', kind: 'llm', config: { messages: [{ role: 'user', content: 'q' }] } }], { provider });
+  const res = await run([{ id: 'a', kind: 'model', config: { messages: [{ role: 'user', content: 'q' }] } }], { provider });
   assert.equal(res.ok, true);
   assert.equal(res.results.get('a').value, 'A');
 });

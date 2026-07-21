@@ -33,7 +33,7 @@ test('circuit breaker: eventual success after transient failures (retry + backof
 test('fetchProvider: parses OpenAI-compatible response (injected fetch)', async () => {
   let sent;
   const fakeFetch = async (url, opts) => { sent = { url, opts }; return { ok: true, json: async () => ({ choices: [{ message: { content: 'hi there' } }], usage: { total_tokens: 5 } }) }; };
-  const p = fetchProvider({ endpoint: 'https://x/v1/chat/completions', model: 'gpt-x', fetchImpl: fakeFetch });
+  const p = fetchProvider({ endpoint: 'https://x/v1/chat/completions', model: 'model-x', fetchImpl: fakeFetch });
   const r = await p.complete({ messages: [{ role: 'user', content: 'q' }] });
   assert.equal(r.text, 'hi there');
   assert.equal(r.meta.usage.total_tokens, 5);
