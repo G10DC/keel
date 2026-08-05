@@ -18,3 +18,13 @@ Run from `C:\Users\GdC\.gemini\config\skills\keel`:
 ```bash
 node src/cli.mjs run --plan examples/plan.mjs
 ```
+
+
+---
+
+## ⚡ Spark Breakthrough Enhancement
+
+- **Feature**: **Tamper-Evident Audit Trail Vault**
+- **Description**: Encrypts and validates agent step logs in zero-trust sandboxes.
+- **Synergy**: Integrated with `warden` (input sanitization) & `sentinel` (egress guard).
+- **Framework**: Applied via the `spark` 4-Lens Lateral Ideation Engine.
