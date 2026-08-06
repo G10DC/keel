@@ -154,7 +154,7 @@ function runCmd(cmd, args, stdinText, timeoutMs) {
 /** Choose the processing engine provider from env. Default: claudeCliProvider (Agent environment itself).
  *  KEEL_PROVIDER=mock → offline mock (tests / no-network demos). */
 export function chooseProvider() {
-  if ((process.env.KEEL_PROVIDER ?? '').toLowerCase() === 'mock') return mockProvider();
+  if ((process.env.KEEL_PROVIDER ?? '').toLowerCase() === 'mock' || process.env.CI) return mockProvider();
   return claudeCliProvider({
     model: process.env.KEEL_CLAUDE_MODEL || undefined,
     timeoutMs: Number(process.env.KEEL_CLAUDE_TIMEOUT_MS) || 120000,
