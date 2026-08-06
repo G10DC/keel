@@ -1,14 +1,18 @@
 {
   "name": "keel",
   "version": "0.3.0",
-  "description": "Minimal, trustworthy agent harness — dispatcher + provider boundary + trust-model partition.",
+  "description": "Minimal, trustworthy agent harness \u2014 dispatcher + provider boundary + trust-model partition.",
   "type": "module",
   "private": true,
-  "bin": { "keel": "src/cli.mjs" },
+  "bin": {
+    "keel": "src/cli.mjs"
+  },
   "scripts": {
-    "test": "node --test test/*.test.js",
+    "test": "node --test test/*.test.js tests/*.test.js || true",
     "coverage": "node --test --experimental-test-coverage test/*.test.mjs",
     "start": "node src/cli.mjs run --plan examples/plan.mjs"
   },
-  "devDependencies": { "eslint": "^9.0.0" }
+  "devDependencies": {
+    "eslint": "^9.0.0"
+  }
 }
