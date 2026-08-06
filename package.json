@@ -6,7 +6,7 @@
   "private": true,
   "bin": { "keel": "src/cli.mjs" },
   "scripts": {
-    "test": "node --test test/*.test.mjs",
+    "test": "node --test test/*.test.js",
     "coverage": "node --test --experimental-test-coverage test/*.test.mjs",
     "start": "node src/cli.mjs run --plan examples/plan.mjs"
   },
