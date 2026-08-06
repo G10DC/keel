@@ -41,3 +41,6 @@ credentials.json
 tmp/
 *.tmp
 .cache/
+
+# Enforced by G10DC Pruning
+.ast-cache.json
