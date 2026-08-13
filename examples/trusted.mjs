@@ -4,7 +4,7 @@
 // with the default provider (Agent environment itself via `agent -p`).
 //
 // Run:   keel run --plan examples/trusted.mjs
-// Offline (no processing engine call):   KEEL_PROVIDER=mock keel run --plan examples/trusted.mjs
+// Offline (no LLM call):   KEEL_PROVIDER=mock keel run --plan examples/trusted.mjs
 import { separateInstructionData, provenance } from '../src/trust.mjs';
 
 // --- Untrusted batch (e.g. scraped / user-supplied) -------------------------------------

@@ -104,7 +104,7 @@ export async function stream(provider, { messages, policy, onToken } = {}) {
 }
 
 /** Drives Agent environment itself via the `agent` CLI in print mode. Reuses the user's existing auth,
- *  model, gateway and settings — so keel's processing engine steps use the SAME backend as the interactive shell.
+ *  model, gateway and settings — so keel's LLM steps use the SAME backend as the interactive shell.
  *  The prompt is piped via stdin (never enters the command line); stdout text is the completion.
  *  Set KEEL_PROVIDER=mock to switch the whole app to the offline mock instead. */
 export function claudeCliProvider({ cmd = 'agent', model, timeoutMs = 120000, extraArgs = [] } = {}) {
@@ -151,7 +151,7 @@ function runCmd(cmd, args, stdinText, timeoutMs) {
   });
 }
 
-/** Choose the processing engine provider from env. Default: claudeCliProvider (Agent environment itself).
+/** Choose the LLM provider from env. Default: claudeCliProvider (Agent environment itself).
  *  KEEL_PROVIDER=mock → offline mock (tests / no-network demos). */
 export function chooseProvider() {
   if ((process.env.KEEL_PROVIDER ?? '').toLowerCase() === 'mock' || process.env.CI) return mockProvider();

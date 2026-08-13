@@ -19,7 +19,7 @@ A minimal, trustworthy spine around coding agents providing structured dispatchi
 
 ## Golden rules
 
-1. **Separate instruction from data** — use `separateInstructionData` before any content touches the processing engine. Why: prompt injection is the #1 attack vector on agent pipelines.
+1. **Separate instruction from data** — use `separateInstructionData` before any content touches the LLM. Why: prompt injection is the #1 attack vector on agent pipelines.
 2. **Freeze the policy before execution** — `createPolicy` returns an immutable object. Why: a mutable policy can be weakened mid-run by the very code it governs.
 3. **Log everything, trust nothing** — `AuditLog` is append-only and hash-chained. Why: tamper-evident trails are the only post-hoc defense when an agent misbehaves.
 4. **Tag provenance on every datum** — `provenance` marks source, trust tier, and timestamp. Why: without provenance, you cannot distinguish trusted instructions from scraped data.

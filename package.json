@@ -8,11 +8,15 @@
     "keel": "src/cli.mjs"
   },
   "scripts": {
-    "test": "node --test test/*.test.js tests/*.test.js || true",
+    "test": "node --test \"test/**/*.test.{js,mjs,cjs}\" \"tests/**/*.test.{js,mjs,cjs}\"",
     "coverage": "node --test --experimental-test-coverage test/*.test.mjs",
     "start": "node src/cli.mjs run --plan examples/plan.mjs"
   },
   "devDependencies": {
     "eslint": "^9.0.0"
-  }
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "license": "MIT"
 }
