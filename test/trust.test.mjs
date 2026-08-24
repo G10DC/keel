@@ -85,3 +85,28 @@ test('AuditLog: the value append returns cannot corrupt the chain either', () =>
   assert.throws(() => { entry.payload.n = 2; }, TypeError);
   assert.equal(log.verify(), true);
 });
+
+// `Object.freeze` is shallow. The policy froze its three containers and left everything
+// inside them writable, so a tool scope could be widened after the policy was sealed.
+test('createPolicy: the policy is immutable, including inside it', () => {
+  const policy = createPolicy({
+    instructions: ['do the card'],
+    tools: [{ name: 'write', scope: { paths: ['lib/'] } }],
+    creds: { api: { key: 'secret' } },
+  });
+
+  assert.throws(() => { policy.tools.push('bash'); }, TypeError);
+  assert.throws(() => { policy.creds.api.key = 'swapped'; }, TypeError);
+  assert.throws(() => { policy.tools[0].scope.paths.push('/etc'); }, TypeError);
+  assert.throws(() => { policy.instructions[0] = 'do something else'; }, TypeError);
+
+  assert.equal(policy.creds.api.key, 'secret');
+  assert.deepEqual(policy.tools[0].scope.paths, ['lib/']);
+});
+
+// content is untrusted by construction — that is why it carries a source at all.
+test('provenance: structured content cannot be edited after it is tagged', () => {
+  const tagged = provenance({ source: 'agy', content: { text: 'what the agent said' } });
+  assert.throws(() => { tagged.content.text = 'something else'; }, TypeError);
+  assert.equal(tagged.content.text, 'what the agent said');
+});

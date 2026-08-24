@@ -1,11 +1,34 @@
 import { createHash } from 'node:crypto';
 
-/** Create a frozen per-task policy. Mutating any field throws — policy is immutable for a task's life. */
+/**
+ * Freeze a value and everything reachable from it.
+ *
+ * `Object.freeze` is shallow, and every use of it in this file was a claim of
+ * immutability that a nested object quietly falsified. Cheap here: policies, provenance
+ * tags and audit entries are all small, and each is frozen exactly once.
+ */
+const deepFreeze = (v) => {
+  if (v === null || typeof v !== 'object' || Object.isFrozen(v)) return v;
+  Object.freeze(v);
+  for (const k of Object.getOwnPropertyNames(v)) deepFreeze(v[k]);
+  return v;
+};
+
+/**
+ * Create a frozen per-task policy. Mutating any field throws — the policy is immutable
+ * for a task's life.
+ *
+ * Frozen DEEPLY, which is what that sentence has to mean to be worth anything. The
+ * shallow version froze the three containers and left everything inside them writable:
+ * a tool declared as `{ name: 'write', scope: { paths: ['lib/'] } }` could have `/etc`
+ * pushed into its scope after the policy was sealed, and a credential could be swapped.
+ * A policy that can be widened after it is frozen is not a policy.
+ */
 export function createPolicy({ instructions = [], tools = [], creds = {} } = {}) {
-  return Object.freeze({
-    instructions: Object.freeze([...instructions]),
-    tools: Object.freeze([...tools]),
-    creds: Object.freeze({ ...creds }),
+  return deepFreeze({
+    instructions: [...instructions],
+    tools: [...tools],
+    creds: { ...creds },
   });
 }
 
@@ -40,9 +63,15 @@ export function separateInstructionData(messages) {
   return { instructions, data };
 }
 
-/** Tag content with provenance (source + timestamp). Frozen. */
+/**
+ * Tag content with provenance (source + timestamp). Frozen deeply.
+ *
+ * `content` is untrusted by construction — that is the whole reason it carries a source.
+ * Freezing only the wrapper left structured content editable after tagging, so the tag
+ * could outlive the thing it was vouching for.
+ */
 export function provenance({ source, content }, ts = Date.now()) {
-  return Object.freeze({ source, content, ts });
+  return deepFreeze({ source, content, ts });
 }
 
 const canonical = (obj) => {
@@ -53,14 +82,6 @@ const canonical = (obj) => {
 };
 const sha = (s) => createHash('sha256').update(s, 'utf8').digest('hex');
 const GENESIS = sha('keel-genesis');
-
-/** Recursively freeze an entry. Cheap: entries are small, and this runs once per append. */
-const deepFreeze = (v) => {
-  if (v === null || typeof v !== 'object' || Object.isFrozen(v)) return v;
-  Object.freeze(v);
-  for (const k of Object.getOwnPropertyNames(v)) deepFreeze(v[k]);
-  return v;
-};
 
 /** Append-only, hash-chained audit log → tamper-evident. */
 export class AuditLog {
