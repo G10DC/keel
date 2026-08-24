@@ -12,10 +12,29 @@ export function createPolicy({ instructions = [], tools = [], creds = {} } = {})
 /** Split messages into instructions (system/instruction roles) vs data (everything else).
  *  The instruction/data partition IS the trust boundary. */
 export function separateInstructionData(messages) {
+  // A bare string is the one wrong input that would NOT throw here, because
+  // strings are iterable: the loop would walk it character by character, find no
+  // `role` on any of them, and file all of it under `data`. The result looks
+  // perfectly well-formed -- `instructions: []`, which is also the safest-looking
+  // outcome this function can produce -- while no separation has happened at all.
+  //
+  // It is also the likeliest mistake, since untrusted content usually arrives as
+  // a string. Everything else already fails loudly (`not iterable`), so this is
+  // the only hole that needed closing.
+  if (typeof messages === 'string') {
+    throw new TypeError(
+      'separateInstructionData expects an array of {role, content} messages, not a string. ' +
+      'A string would be iterated character by character and silently classified as data.'
+    );
+  }
+  if (!Array.isArray(messages)) {
+    throw new TypeError(`separateInstructionData expects an array of messages, received ${messages === null ? 'null' : typeof messages}.`);
+  }
+
   const instructions = [];
   const data = [];
   for (const m of messages) {
-    if (m.role === 'system' || m.role === 'instruction') instructions.push(m);
+    if (m && (m.role === 'system' || m.role === 'instruction')) instructions.push(m);
     else data.push(m);
   }
   return { instructions, data };
