@@ -33,10 +33,55 @@ test('AuditLog: hash chain verifies when clean', () => {
   assert.equal(log.verify(), true);
 });
 
-test('AuditLog: tamper-evident (mutating an entry breaks verify)', () => {
+test('AuditLog: tamper-evident (replacing an entry breaks verify)', () => {
   const log = new AuditLog();
   log.append({ type: 'a', payload: { x: 1 } });
   log.append({ type: 'b', payload: { x: 2 } });
-  log._entries[0].payload = { x: 999 };
+  // Entries are frozen, so tampering now has to replace one outright rather than edit it
+  // in place. That is the point: an accident cannot do this, and the chain still catches it.
+  log._entries[0] = { ...log._entries[0], payload: { x: 999 } };
   assert.equal(log.verify(), false);
+});
+
+test('AuditLog: tamper-evident (removing or reordering entries breaks verify)', () => {
+  const log = new AuditLog();
+  log.append({ type: 'a', payload: { x: 1 } });
+  log.append({ type: 'b', payload: { x: 2 } });
+  log.append({ type: 'c', payload: { x: 3 } });
+
+  const removed = new AuditLog();
+  removed._entries = [log._entries[0], log._entries[2]];
+  assert.equal(removed.verify(), false);
+
+  const reordered = new AuditLog();
+  reordered._entries = [log._entries[1], log._entries[0], log._entries[2]];
+  assert.equal(reordered.verify(), false);
+});
+
+// The accessor whose visible purpose is to protect the log was the way through it.
+// `this._entries.map((e) => ({ ...e }))` reads as "callers get copies", and a spread is
+// shallow: `payload` and `provenance` came back as the same objects the chain was hashed
+// over, so merely reading the log could corrupt it.
+test('AuditLog: reading the log cannot corrupt it', () => {
+  const log = new AuditLog();
+  log.append({ type: 'ingest', payload: { source: 'agy', bytes: 100 } });
+  log.append({ type: 'ingest', payload: { source: 'agy', bytes: 200 }, provenance: { source: 'agy', ts: 1 } });
+  assert.equal(log.verify(), true);
+
+  for (const entry of log.entries) {
+    assert.throws(() => { entry.payload.bytes = 999; }, TypeError);
+    assert.throws(() => { entry.hash = 'forged'; }, TypeError);
+    if (entry.provenance) assert.throws(() => { entry.provenance.source = 'elsewhere'; }, TypeError);
+  }
+
+  assert.equal(log.entries[0].payload.bytes, 100);
+  assert.equal(log.verify(), true, 'reading the log made it report itself corrupt');
+});
+
+// append() returns another reference into the chain, not a copy of one.
+test('AuditLog: the value append returns cannot corrupt the chain either', () => {
+  const log = new AuditLog();
+  const entry = log.append({ type: 'x', payload: { n: 1 } });
+  assert.throws(() => { entry.payload.n = 2; }, TypeError);
+  assert.equal(log.verify(), true);
 });
